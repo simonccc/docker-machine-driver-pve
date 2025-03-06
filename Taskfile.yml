@@ -29,3 +29,39 @@ tasks:
       mkdir -p ./tools
       && curl -L https://github.com/rancher/machine/releases/download/{{.VERSION}}/rancher-machine-amd64.tar.gz
       | tar -xvzf - -C ./tools
+
+  # |------------------------------------------------------------------------------------------------------------------
+  # | Dependencies
+  # |------------------------------------------------------------------------------------------------------------------
+  dependencies:
+    desc: Install dependencies
+    deps:
+      - dependencies:node_modules
+    silent: true
+    cmd: >
+      echo "✅ ALL DEPENDENCIES INSTALLED"
+
+  dependencies:node_modules:
+    method: checksum
+    sources:
+      - package.json
+      - package-lock.json
+    cmd: >
+      npm install
+
+  # |------------------------------------------------------------------------------------------------------------------
+  # | Linters (&checks)
+  # |------------------------------------------------------------------------------------------------------------------
+  lint:
+    desc: Run linters
+    deps:
+      - lint:commits
+    silent: true
+    cmd: >
+      echo "✅ ALL LINTERS PASSED"
+
+  lint:commits:
+    deps:
+      - dependencies:node_modules
+    cmd: >
+      npm exec commitlint -- --from=main --verbose
