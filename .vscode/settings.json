@@ -1,0 +1,8 @@
+{
+  "terminal.integrated.env.linux": {
+    "PATH": "${env:PATH}:${workspaceFolder}/tools"
+  },
+  "[yaml]": {
+    "editor.formatOnSave": true,
+  },
+}
