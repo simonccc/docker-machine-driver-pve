@@ -122,3 +122,23 @@ tasks:
       - dependencies:node_modules
     cmd: >
       npm exec markdownlint-cli2 -- **/*.md
+
+  # |------------------------------------------------------------------------------------------------------------------
+  # | Builds
+  # |------------------------------------------------------------------------------------------------------------------
+  build:
+    desc: Build project
+    deps:
+      - build:docker-machine-driver-pve
+    silent: true
+    cmd: >
+      echo "✅ PROJECT BUILT"
+
+  build:docker-machine-driver-pve:
+    deps:
+      - dependencies:vendor
+    sources:
+      - cmd/**/*.go
+    cmd: >
+      mkdir -p ./bin
+      && CGO_ENABLED="0" go build -o ./bin/docker-machine-driver-pve ./cmd/docker-machine-driver-pve

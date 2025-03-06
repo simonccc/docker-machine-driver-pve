@@ -1,4 +1,5 @@
 /.task
+/bin
 /node_modules
 /tools
 /vendor
