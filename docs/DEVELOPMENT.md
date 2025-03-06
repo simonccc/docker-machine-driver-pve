@@ -21,6 +21,8 @@ This document provides guidelines for setting up the development environment, ru
     code docker-machine-driver-pve
     ```
 
+1. Install recommended VS Code extensions: `F1 > Extensions: Show Recommended Extensions`
+
 1. Install tools:
 
     ```bash

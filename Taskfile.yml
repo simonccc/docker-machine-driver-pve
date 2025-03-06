@@ -90,6 +90,7 @@ tasks:
       - lint:commits
       - lint:go
       - lint:go-licenses
+      - lint:markdown
     silent: true
     cmd: >
       echo "✅ ALL LINTERS PASSED"
@@ -115,3 +116,9 @@ tasks:
       ./tools/go-licenses check ./...
       --ignore "github.com/stellatarum/docker-machine-driver-pve"
       --disallowed_types=forbidden,restricted,reciprocal,unknown
+
+  lint:markdown:
+    deps:
+      - dependencies:node_modules
+    cmd: >
+      npm exec markdownlint-cli2 -- **/*.md

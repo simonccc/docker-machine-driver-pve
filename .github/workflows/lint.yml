@@ -33,3 +33,11 @@ jobs:
           go-licenses check ./...
           --ignore "github.com/stellatarum/docker-machine-driver-pve"
           --disallowed_types=forbidden,restricted,reciprocal,unknown
+
+  markdownlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v19
+        with:
+          globs: "**/*.md"
