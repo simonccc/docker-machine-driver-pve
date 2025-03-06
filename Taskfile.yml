@@ -13,11 +13,20 @@ tasks:
   tools:
     desc: Install tools to ./tools directory
     deps:
+      - tools:go-licenses
       - tools:golangci-lint
       - tools:rancher-machine
     silent: true
     cmd: >
       echo "✅ ALL TOOLS INSTALLED"
+
+  tools:go-licenses:
+    vars:
+      VERSION: v1.6.0
+    cmd: >
+      mkdir -p ./tools
+      && export GOBIN="$(realpath ./tools)"
+      && go install github.com/google/go-licenses@{{.VERSION}}
 
   tools:golangci-lint:
     vars:
@@ -80,6 +89,7 @@ tasks:
     deps:
       - lint:commits
       - lint:go
+      - lint:go-licenses
     silent: true
     cmd: >
       echo "✅ ALL LINTERS PASSED"
@@ -96,3 +106,12 @@ tasks:
       - dependencies:vendor
     cmd: >
       ./tools/golangci-lint run -v
+
+  lint:go-licenses:
+    deps:
+      - tools:go-licenses
+      - dependencies:vendor
+    cmd: >
+      ./tools/go-licenses check ./...
+      --ignore "github.com/stellatarum/docker-machine-driver-pve"
+      --disallowed_types=forbidden,restricted,reciprocal,unknown

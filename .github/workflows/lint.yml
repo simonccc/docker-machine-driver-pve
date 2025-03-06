@@ -32,3 +32,17 @@ jobs:
       - uses: golangci/golangci-lint-action@v6
         with:
           version: v1.64.6
+
+  go-licenses:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go install github.com/google/go-licenses@v1.6.0
+      - run: go mod vendor
+      - run: >
+          go-licenses check ./...
+          --ignore "github.com/stellatarum/docker-machine-driver-pve"
+          --disallowed_types=forbidden,restricted,reciprocal,unknown
