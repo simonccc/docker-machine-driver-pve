@@ -1,0 +1,31 @@
+version: "3"
+
+dotenv:
+  - .env
+  - .env.default
+
+output: prefixed
+
+tasks:
+  # |------------------------------------------------------------------------------------------------------------------
+  # | Tools
+  # |------------------------------------------------------------------------------------------------------------------
+  tools:
+    desc: Install tools to ./tools directory
+    deps:
+      - tools:rancher-machine
+    silent: true
+    cmd: >
+      echo "✅ ALL TOOLS INSTALLED"
+
+  tools:rancher-machine:
+    vars:
+      VERSION: v0.15.0-rancher126
+    status:
+      - >
+        ./tools/rancher-machine --version
+        | grep -q '{{.VERSION}}'
+    cmd: >
+      mkdir -p ./tools
+      && curl -L https://github.com/rancher/machine/releases/download/{{.VERSION}}/rancher-machine-amd64.tar.gz
+      | tar -xvzf - -C ./tools
