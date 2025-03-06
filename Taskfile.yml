@@ -37,6 +37,7 @@ tasks:
     desc: Install dependencies
     deps:
       - dependencies:node_modules
+      - dependencies:vendor
     silent: true
     cmd: >
       echo "✅ ALL DEPENDENCIES INSTALLED"
@@ -48,6 +49,15 @@ tasks:
       - package-lock.json
     cmd: >
       npm install
+
+  dependencies:vendor:
+    method: checksum
+    sources:
+      - go.mod
+      - go.sum
+    cmds:
+      - go mod tidy
+      - go mod vendor
 
   # |------------------------------------------------------------------------------------------------------------------
   # | Linters (&checks)
