@@ -13,10 +13,23 @@ tasks:
   tools:
     desc: Install tools to ./tools directory
     deps:
+      - tools:golangci-lint
       - tools:rancher-machine
     silent: true
     cmd: >
       echo "✅ ALL TOOLS INSTALLED"
+
+  tools:golangci-lint:
+    vars:
+      VERSION: v1.64.6
+    status:
+      - >
+        ./tools/golangci-lint version --format short
+        | grep -q '{{.VERSION}}'
+    cmd: >
+      mkdir -p ./tools
+      && export GOBIN="$(realpath ./tools)"
+      && go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{.VERSION}}
 
   tools:rancher-machine:
     vars:
@@ -66,6 +79,7 @@ tasks:
     desc: Run linters
     deps:
       - lint:commits
+      - lint:go
     silent: true
     cmd: >
       echo "✅ ALL LINTERS PASSED"
@@ -75,3 +89,10 @@ tasks:
       - dependencies:node_modules
     cmd: >
       npm exec commitlint -- --from=main --verbose
+
+  lint:go:
+    deps:
+      - tools:golangci-lint
+      - dependencies:vendor
+    cmd: >
+      ./tools/golangci-lint run -v
