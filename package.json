@@ -1,0 +1,8 @@
+{
+  "name": "docker-machine-driver-pve",
+  "private": true,
+  "devDependencies": {
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1"
+  }
+}

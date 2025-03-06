@@ -1,0 +1,18 @@
+extends:
+  - "@commitlint/config-conventional"
+rules:
+  type-enum:
+    - 2
+    - always
+    - # New feature
+      - feat
+      # Bugfix
+      - fix
+      # Code changes apart from new feature or bugfix
+      - refactor
+      # Documentation changes
+      - docs
+      # Changes to build scripts and CI/CD
+      - build
+      # Other changes: bumping dependencies, configuring tools etc.
+      - chore
