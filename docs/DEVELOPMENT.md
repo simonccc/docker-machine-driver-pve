@@ -6,6 +6,7 @@ This document provides guidelines for setting up the development environment, ru
 
 * [VS Code](https://code.visualstudio.com/)
 * [Task](https://taskfile.dev/)
+* [Go](https://go.dev/)
 * [Node.js](https://nodejs.org/)
 
 ## Setting up Development Environment

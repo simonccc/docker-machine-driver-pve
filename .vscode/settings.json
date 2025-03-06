@@ -1,4 +1,17 @@
 {
+  "editor.indentSize": "tabSize",
+  "editor.tabSize": 2,
+  "files.insertFinalNewline": true,
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": [
+      "--fast",
+  ],
+  "gopls": {
+      "formatting.gofumpt": true,
+  },
+  "go.alternateTools": {
+    "golangci-lint": "${workspaceFolder}/tools/golangci-lint",
+  },
   "terminal.integrated.env.linux": {
     "PATH": "${env:PATH}:${workspaceFolder}/tools"
   },

@@ -13,10 +13,32 @@ tasks:
   tools:
     desc: Install tools to ./tools directory
     deps:
+      - tools:go-licenses
+      - tools:golangci-lint
       - tools:rancher-machine
     silent: true
     cmd: >
       echo "✅ ALL TOOLS INSTALLED"
+
+  tools:go-licenses:
+    vars:
+      VERSION: v1.6.0
+    cmd: >
+      mkdir -p ./tools
+      && export GOBIN="$(realpath ./tools)"
+      && go install github.com/google/go-licenses@{{.VERSION}}
+
+  tools:golangci-lint:
+    vars:
+      VERSION: v1.64.6
+    status:
+      - >
+        ./tools/golangci-lint version --format short
+        | grep -q '{{.VERSION}}'
+    cmd: >
+      mkdir -p ./tools
+      && export GOBIN="$(realpath ./tools)"
+      && go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{.VERSION}}
 
   tools:rancher-machine:
     vars:
@@ -37,6 +59,7 @@ tasks:
     desc: Install dependencies
     deps:
       - dependencies:node_modules
+      - dependencies:vendor
     silent: true
     cmd: >
       echo "✅ ALL DEPENDENCIES INSTALLED"
@@ -49,6 +72,15 @@ tasks:
     cmd: >
       npm install
 
+  dependencies:vendor:
+    method: checksum
+    sources:
+      - go.mod
+      - go.sum
+    cmds:
+      - go mod tidy
+      - go mod vendor
+
   # |------------------------------------------------------------------------------------------------------------------
   # | Linters (&checks)
   # |------------------------------------------------------------------------------------------------------------------
@@ -56,6 +88,8 @@ tasks:
     desc: Run linters
     deps:
       - lint:commits
+      - lint:go
+      - lint:go-licenses
     silent: true
     cmd: >
       echo "✅ ALL LINTERS PASSED"
@@ -65,3 +99,19 @@ tasks:
       - dependencies:node_modules
     cmd: >
       npm exec commitlint -- --from=main --verbose
+
+  lint:go:
+    deps:
+      - tools:golangci-lint
+      - dependencies:vendor
+    cmd: >
+      ./tools/golangci-lint run -v
+
+  lint:go-licenses:
+    deps:
+      - tools:go-licenses
+      - dependencies:vendor
+    cmd: >
+      ./tools/go-licenses check ./...
+      --ignore "github.com/stellatarum/docker-machine-driver-pve"
+      --disallowed_types=forbidden,restricted,reciprocal,unknown

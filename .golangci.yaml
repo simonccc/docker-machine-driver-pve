@@ -1,0 +1,23 @@
+run:
+  timeout: "5m"
+linters:
+  enable-all: true
+  disable:
+    - depguard
+    - err113
+    - exhaustruct
+    - funlen
+    - godox
+    - musttag
+    - nlreturn
+    - paralleltest
+    - testpackage
+    # Deprecated
+    - exportloopref
+linters-settings:
+  varnamelen:
+    ignore-names:
+      - vm
+  lll:
+    tab-width: 2
+    line-length: 200
