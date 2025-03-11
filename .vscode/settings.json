@@ -15,6 +15,11 @@
   "terminal.integrated.env.linux": {
     "PATH": "${env:PATH}:${workspaceFolder}/tools"
   },
+  "[markdown]": {
+    "editor.tabSize": 4,
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+    "editor.formatOnSave": true,
+  },
   "[yaml]": {
     "editor.formatOnSave": true,
   },
