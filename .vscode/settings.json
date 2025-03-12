@@ -13,7 +13,7 @@
     "golangci-lint": "${workspaceFolder}/tools/golangci-lint",
   },
   "terminal.integrated.env.linux": {
-    "PATH": "${env:PATH}:${workspaceFolder}/tools"
+    "PATH": "${env:PATH}:${workspaceFolder}/tools:${workspaceFolder}/bin"
   },
   "[markdown]": {
     "editor.tabSize": 4,

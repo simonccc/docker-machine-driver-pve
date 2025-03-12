@@ -1,4 +1,4 @@
-# Ubuntu Server template
+# Sample Ubuntu Server template
 
 This is sample Packer configuration for creating an Ubuntu Server template compatible with the [Docker/Rancher Machine driver](../../../README.md). This template is intended **for testing purposes only**. It has **NOT** been security-hardened or validated for production deployments.
 

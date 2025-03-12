@@ -21,3 +21,5 @@ linters-settings:
   lll:
     tab-width: 2
     line-length: 200
+  cyclop:
+    max-complexity: 15
