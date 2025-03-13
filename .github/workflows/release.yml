@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: GitHub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install go-licenses
+        run: go install github.com/google/go-licenses@v1.6.0
+      - name: Pull dependencies
+        run: go mod vendor
+      - run: mkdir -p ./release_artifacts
+      # Generate release artifacts
+      - name: Build docker-machine-driver-pve
+        run: >
+          go build -o ./release_artifacts/docker-machine-driver-pve ./cmd/docker-machine-driver-pve
+        env:
+          CGO_ENABLED: 0
+          GOOS: linux
+          GOARCH: amd64
+      - name: Generate checksums.txt
+        run: >
+          (cd ./release_artifacts && sha256sum ./* > checksums.txt)
+      - name: Save licenses
+        run: >
+          go-licenses save ./... --include_tests --force --save_path ./licenses
+      - name: Generate licenses.txt
+        run: >
+          for FILE_PATH in $(find "./licenses" -type f | LC_ALL=C sort); do \
+            echo -e "${FILE_PATH#./licenses/}:\n" >> ./release_artifacts/licenses.txt \
+            && while read -r LINE; do echo "	$LINE" >> ./release_artifacts/licenses.txt; done < $FILE_PATH \
+            && echo -e "" >> ./release_artifacts/licenses.txt; \
+          done
+      # Create the release
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --repo="$GITHUB_REPOSITORY" \
+            --title="${{ github.ref_name }}" \
+            --draft \
+            --generate-notes \
+            ./release_artifacts/*
