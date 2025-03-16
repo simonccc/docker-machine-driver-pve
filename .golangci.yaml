@@ -23,3 +23,6 @@ linters-settings:
     line-length: 200
   cyclop:
     max-complexity: 15
+  gomoddirectives:
+    replace-allow-list:
+      - github.com/docker/docker
