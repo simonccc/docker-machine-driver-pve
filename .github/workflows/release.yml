@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Set-up build environment
+      - uses: azure/setup-helm@v4.3.0
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -21,18 +23,26 @@ jobs:
         run: go install github.com/google/go-licenses@v1.6.0
       - name: Pull dependencies
         run: go mod vendor
+      # Build release artifacts
       - run: mkdir -p ./release_artifacts
-      # Generate release artifacts
-      - name: Build docker-machine-driver-pve
+      - name: Build driver binaries
         run: >
           go build -o ./release_artifacts/docker-machine-driver-pve ./cmd/docker-machine-driver-pve
+          && (cd ./release_artifacts && sha256sum ./docker-machine-driver-pve > checksums.txt)
         env:
           CGO_ENABLED: 0
           GOOS: linux
           GOARCH: amd64
-      - name: Generate checksums.txt
+      - name: Package Helm Chart
         run: >
-          (cd ./release_artifacts && sha256sum ./* > checksums.txt)
+          CHECKSUM="$(sha256sum ./release_artifacts/docker-machine-driver-pve | cut -d' ' -f1)"
+          && yq -i ".nodeDriver.url = \"${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/docker-machine-driver-pve\"" deploy/charts/pve-node-driver/values.yaml
+          && yq -i ".nodeDriver.checksum = \"${CHECKSUM}\"" deploy/charts/pve-node-driver/values.yaml
+          && cat deploy/charts/pve-node-driver/values.yaml
+          && helm package ./deploy/charts/pve-node-driver \
+              --version "${GITHUB_REF_NAME#v}" \
+              --app-version "${GITHUB_REF_NAME}" \
+              --destination ./release_artifacts
       - name: Save licenses
         run: >
           go-licenses save ./... --include_tests --force --save_path ./licenses
@@ -47,10 +57,10 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "${{ github.ref_name }}" \
-            --repo="$GITHUB_REPOSITORY" \
-            --title="${{ github.ref_name }}" \
+        run: >
+          gh release create "${GITHUB_REF_NAME}" \
+            --repo="${GITHUB_REPOSITORY}" \
+            --title="${GITHUB_REF_NAME}" \
             --draft \
             --generate-notes \
             ./release_artifacts/*
