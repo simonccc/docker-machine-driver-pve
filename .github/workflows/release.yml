@@ -5,6 +5,10 @@ on:
     tags:
       - "v*"
 
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -13,7 +17,13 @@ jobs:
     name: GitHub
     runs-on: ubuntu-latest
     steps:
+      # Set-up git
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: >
+          git config user.name 'github-actions[bot]'
+          && git config user.email 'github-actions[bot]@users.noreply.github.com'
       # Set-up build environment
       - uses: azure/setup-helm@v4.3.0
       - uses: actions/setup-go@v5
@@ -53,8 +63,8 @@ jobs:
             && while read -r LINE; do echo "	$LINE" >> ./release_artifacts/licenses.txt; done < $FILE_PATH \
             && echo -e "" >> ./release_artifacts/licenses.txt; \
           done
-      # Create the release
-      - name: Create release
+      # Release
+      - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: >
@@ -64,3 +74,11 @@ jobs:
             --draft \
             --generate-notes \
             ./release_artifacts/*
+      - name: Update GitHub Pages Helm repo index
+        run: >
+          git checkout gh-pages --force
+          && helm repo index ./release_artifacts --merge ./index.yaml --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}"
+          && cp ./release_artifacts/index.yaml ./index.yaml
+          && git add ./index.yaml
+          && git commit -m "chore: update Helm repo index for ${GITHUB_REF_NAME}"
+          && git push origin gh-pages
