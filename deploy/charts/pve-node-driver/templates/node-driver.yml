@@ -1,0 +1,14 @@
+apiVersion: management.cattle.io/v3
+kind: NodeDriver
+metadata:
+  name: pve
+spec:
+  displayName: "Proxmox VE"
+  description: "Node Driver for Proxmox Virtual Environment"
+  uiUrl: ""
+  url: {{ .Values.nodeDriver.url | quote }}
+  checksum: {{ .Values.nodeDriver.checksum | quote }}
+  externalId: ""
+  active: true
+  addCloudCredential: false
+  builtin: false
