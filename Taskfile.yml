@@ -94,6 +94,7 @@ tasks:
     deps:
       - lint:commits
       - lint:go
+      - lint:node
       - lint:go-licenses
       - lint:markdown
     silent: true
@@ -115,6 +116,20 @@ tasks:
     cmd: >
       ./tools/golangci-lint run -v
 
+  lint:node:
+    run: once
+    deps:
+      - dependencies:node
+    cmd: >
+      yarn exec eslint
+
+  lint:markdown:
+    run: once
+    deps:
+      - dependencies:node
+    cmd: >
+      yarn exec markdownlint-cli2 -- **/*.md
+
   lint:go-licenses:
     run: once
     deps:
@@ -125,13 +140,6 @@ tasks:
       --ignore "github.com/stellatarum/docker-machine-driver-pve"
       --disallowed_types=forbidden,restricted,reciprocal,unknown
 
-  lint:markdown:
-    run: once
-    deps:
-      - dependencies:node
-    cmd: >
-      yarn exec markdownlint-cli2 -- **/*.md
-
   # |------------------------------------------------------------------------------------------------------------------
   # | Builds
   # |------------------------------------------------------------------------------------------------------------------
@@ -139,6 +147,7 @@ tasks:
     desc: Build project
     deps:
       - build:docker-machine-driver-pve
+      - build:pve-node-driver
     silent: true
     cmd: >
       echo "✅ PROJECT BUILT"
@@ -152,3 +161,12 @@ tasks:
     cmd: >
       mkdir -p ./bin
       && CGO_ENABLED="0" go build -o ./bin/docker-machine-driver-pve ./cmd/docker-machine-driver-pve
+
+  build:pve-node-driver:
+    run: once
+    deps:
+      - dependencies:node
+    sources:
+      - pkd/**/*
+    cmd: >
+      yarn build-pkg pve-node-driver

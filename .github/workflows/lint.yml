@@ -20,6 +20,19 @@ jobs:
         with:
           version: v1.64.6
 
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn exec eslint
+
   go-licenses:
     runs-on: ubuntu-latest
     steps:

@@ -1,6 +1,7 @@
 /.env
 /.task
 /bin
+/dist-pkg
 /node_modules
 /tools
 /vendor
