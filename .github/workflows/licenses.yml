@@ -16,7 +16,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go install github.com/google/go-licenses@v1.6.0
+      - run: >
+          mkdir -p ./tools
+          && export GOBIN="$(realpath ./tools)"
+          && go install github.com/google/go-licenses@v1.6.0
       - run: go mod vendor
       - run: ./tasks/licenses-go.sh
 
