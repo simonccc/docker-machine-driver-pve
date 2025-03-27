@@ -1,8 +1,8 @@
 version: "3"
 
-dotenv:
-  - .env
-  - .env.default
+# dotenv:
+#   - .env
+#   - .env.default
 
 output: prefixed
 
@@ -61,20 +61,11 @@ tasks:
   dependencies:
     desc: Install dependencies
     deps:
-      - dependencies:node
       - dependencies:go
+      - dependencies:node
     silent: true
     cmd: >
       echo "✅ ALL DEPENDENCIES INSTALLED"
-
-  dependencies:node:
-    run: once
-    method: checksum
-    sources:
-      - package.json
-      - yarn.lock
-    cmd: >
-      yarn install --frozen-lockfile
 
   dependencies:go:
     run: once
@@ -86,15 +77,49 @@ tasks:
       - go mod tidy
       - go mod vendor
 
+  dependencies:node:
+    run: once
+    method: checksum
+    sources:
+      - package.json
+      - yarn.lock
+    cmd: >
+      yarn install --frozen-lockfile
+
   # |------------------------------------------------------------------------------------------------------------------
-  # | Linters (&checks)
+  # | License checks
+  # |------------------------------------------------------------------------------------------------------------------
+  licenses:
+    desc: Check licenses
+    deps:
+      - licenses:go
+      - licenses:node
+    silent: true
+    cmd: >
+      echo "✅ ALL LICENSES VALID"
+
+  licenses:go:
+    run: once
+    deps:
+      - tools:go-licenses
+      - dependencies:go
+    cmd: ./tasks/licenses-go.sh
+
+  licenses:node:
+    run: once
+    deps:
+      - dependencies:node
+    cmd: ./tasks/licenses-node.sh
+
+  # |------------------------------------------------------------------------------------------------------------------
+  # | Linters
   # |------------------------------------------------------------------------------------------------------------------
   lint:
     desc: Run linters
     deps:
       - lint:commits
       - lint:go
-      - lint:go-licenses
+      - lint:node
       - lint:markdown
     silent: true
     cmd: >
@@ -115,15 +140,12 @@ tasks:
     cmd: >
       ./tools/golangci-lint run -v
 
-  lint:go-licenses:
+  lint:node:
     run: once
     deps:
-      - tools:go-licenses
-      - dependencies:go
+      - dependencies:node
     cmd: >
-      ./tools/go-licenses check ./...
-      --ignore "github.com/stellatarum/docker-machine-driver-pve"
-      --disallowed_types=forbidden,restricted,reciprocal,unknown
+      yarn exec eslint
 
   lint:markdown:
     run: once
@@ -139,6 +161,7 @@ tasks:
     desc: Build project
     deps:
       - build:docker-machine-driver-pve
+      - build:pve-node-driver
     silent: true
     cmd: >
       echo "✅ PROJECT BUILT"
@@ -152,3 +175,12 @@ tasks:
     cmd: >
       mkdir -p ./bin
       && CGO_ENABLED="0" go build -o ./bin/docker-machine-driver-pve ./cmd/docker-machine-driver-pve
+
+  build:pve-node-driver:
+    run: once
+    deps:
+      - dependencies:node
+    sources:
+      - pkd/**/*
+    cmd: >
+      yarn build-pkg pve-node-driver

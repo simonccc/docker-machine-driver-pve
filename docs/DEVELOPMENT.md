@@ -43,6 +43,14 @@ We use [Task](https://taskfile.dev/) for common development tasks. Run following
 task --list
 ```
 
+## Running Rancher Dashboard with UI Extension locally
+
+```bash
+API=<Rancher Backend URL> yarn dev
+```
+
+See [Rancher UI Extensions documentation](https://extensions.rancher.io/) for more info.
+
 ## Commit Message Guidelines
 
 We follow the [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) specification. Allowed commit types are defined in [`.commitlintrc.yaml`](../.commitlintrc.yaml).
