@@ -98,6 +98,14 @@ tasks:
     cmd: >
       echo "✅ ALL LICENSES VALID"
 
+  licenses:save:
+    desc: Save third-party licenses to licenses.txt
+    deps:
+      - dependencies:go
+      - dependencies:node
+      - tools:go-licenses
+    cmd: ./tasks/licenses-save.sh
+
   licenses:go:
     run: once
     deps:
