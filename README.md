@@ -16,7 +16,7 @@ This is a Docker/[Rancher Machine](https://github.com/rancher/machine) driver fo
     * Index URL: `https://stellatarum.github.io/docker-machine-driver-pve`
     * Authentication: `None`
 
-1. In `local` cluster explorer go to `Apps > Repositories > Charts` and search for `Proxmox VE Node Driver` chart and install it
+1. Go to `Extensions > Available` and install `Proxmox VE Node Driver`
 
 1. Go to `Cluster Management > Drivers > Node Drivers > Pve > Edit config` and add your Proxmox domain to `Whitelist Domains`
 

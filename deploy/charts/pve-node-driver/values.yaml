@@ -1,3 +1,5 @@
 nodeDriver:
   url: ""
   checksum: ""
+uiPlugin:
+  endpoint: ""
