@@ -68,10 +68,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: >
-          gh release create "${GITHUB_REF_NAME}" \
+          RELEASE_FLAGS=""
+          && if [[ "${GITHUB_REF_NAME}" == *"-rc"* ]]; then RELEASE_FLAGS="--prerelease"; fi
+          && gh release create "${GITHUB_REF_NAME}" \
             --repo="${GITHUB_REPOSITORY}" \
             --title="${GITHUB_REF_NAME}" \
-            --draft \
+            $RELEASE_FLAGS \
             --generate-notes \
             ./release_artifacts/*
       - name: Update GitHub Pages Helm repo index
