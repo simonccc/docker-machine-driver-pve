@@ -25,14 +25,26 @@ jobs:
           git config user.name 'github-actions[bot]'
           && git config user.email 'github-actions[bot]@users.noreply.github.com'
       # Set-up build environment
-      - uses: azure/setup-helm@v4.3.0
-      - uses: actions/setup-go@v5
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.0
+      - name: Install Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Install go-licenses
-        run: go install github.com/google/go-licenses@v1.6.0
-      - name: Pull dependencies
+      - name: Pull Go dependencies
         run: go mod vendor
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - name: Pull Node dependencies
+        run: yarn install --frozen-lockfile
+      - name: Install go-licenses
+        run: >
+          mkdir -p ./tools
+          && export GOBIN="$(realpath ./tools)"
+          && go install github.com/google/go-licenses@v1.6.0
       # Build release artifacts
       - run: mkdir -p ./release_artifacts
       - name: Build driver binaries
@@ -53,16 +65,10 @@ jobs:
               --version "${GITHUB_REF_NAME#v}" \
               --app-version "${GITHUB_REF_NAME}" \
               --destination ./release_artifacts
-      - name: Save licenses
-        run: >
-          go-licenses save ./... --include_tests --force --save_path ./licenses
       - name: Generate licenses.txt
         run: >
-          for FILE_PATH in $(find "./licenses" -type f | LC_ALL=C sort); do \
-            echo -e "${FILE_PATH#./licenses/}:\n" >> ./release_artifacts/licenses.txt \
-            && while read -r LINE; do echo "	$LINE" >> ./release_artifacts/licenses.txt; done < $FILE_PATH \
-            && echo -e "" >> ./release_artifacts/licenses.txt; \
-          done
+          ./tasks/licenses-save.sh
+          && mv licenses.txt ./release_artifacts
       # Release
       - name: Create GitHub release
         env:
