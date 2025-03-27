@@ -1,4 +1,4 @@
-name: lint
+name: licenses
 
 on:
   push:
@@ -16,9 +16,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - uses: golangci/golangci-lint-action@v6
-        with:
-          version: v1.64.6
+      - run: go install github.com/google/go-licenses@v1.6.0
+      - run: go mod vendor
+      - run: ./tasks/licenses-go.sh
 
   node:
     runs-on: ubuntu-latest
@@ -31,12 +31,4 @@ jobs:
           node-version: 20
           cache: yarn
       - run: yarn install --frozen-lockfile
-      - run: yarn exec eslint
-
-  markdownlint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: DavidAnson/markdownlint-cli2-action@v19
-        with:
-          globs: "**/*.md"
+      - run: ./tasks/licenses-node.sh

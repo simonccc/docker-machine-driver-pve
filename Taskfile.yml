@@ -1,8 +1,8 @@
 version: "3"
 
-dotenv:
-  - .env
-  - .env.default
+# dotenv:
+#   - .env
+#   - .env.default
 
 output: prefixed
 
@@ -61,20 +61,11 @@ tasks:
   dependencies:
     desc: Install dependencies
     deps:
-      - dependencies:node
       - dependencies:go
+      - dependencies:node
     silent: true
     cmd: >
       echo "✅ ALL DEPENDENCIES INSTALLED"
-
-  dependencies:node:
-    run: once
-    method: checksum
-    sources:
-      - package.json
-      - yarn.lock
-    cmd: >
-      yarn install --frozen-lockfile
 
   dependencies:go:
     run: once
@@ -86,8 +77,42 @@ tasks:
       - go mod tidy
       - go mod vendor
 
+  dependencies:node:
+    run: once
+    method: checksum
+    sources:
+      - package.json
+      - yarn.lock
+    cmd: >
+      yarn install --frozen-lockfile
+
   # |------------------------------------------------------------------------------------------------------------------
-  # | Linters (&checks)
+  # | License checks
+  # |------------------------------------------------------------------------------------------------------------------
+  licenses:
+    desc: Check licenses
+    deps:
+      - licenses:go
+      - licenses:node
+    silent: true
+    cmd: >
+      echo "✅ ALL LICENSES VALID"
+
+  licenses:go:
+    run: once
+    deps:
+      - tools:go-licenses
+      - dependencies:go
+    cmd: ./tasks/licenses-go.sh
+
+  licenses:node:
+    run: once
+    deps:
+      - dependencies:node
+    cmd: ./tasks/licenses-node.sh
+
+  # |------------------------------------------------------------------------------------------------------------------
+  # | Linters
   # |------------------------------------------------------------------------------------------------------------------
   lint:
     desc: Run linters
@@ -95,7 +120,6 @@ tasks:
       - lint:commits
       - lint:go
       - lint:node
-      - lint:go-licenses
       - lint:markdown
     silent: true
     cmd: >
@@ -129,16 +153,6 @@ tasks:
       - dependencies:node
     cmd: >
       yarn exec markdownlint-cli2 -- **/*.md
-
-  lint:go-licenses:
-    run: once
-    deps:
-      - tools:go-licenses
-      - dependencies:go
-    cmd: >
-      ./tools/go-licenses check ./...
-      --ignore "github.com/stellatarum/docker-machine-driver-pve"
-      --disallowed_types=forbidden,restricted,reciprocal,unknown
 
   # |------------------------------------------------------------------------------------------------------------------
   # | Builds
