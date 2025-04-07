@@ -38,6 +38,9 @@ func (d *Driver) setupCloudinit(ctx context.Context) error {
 
 // Blocks until cloud-init finishes setup on the current machine.
 func (d *Driver) waitForCloudinit() error {
+	ctx, cancel := context.WithTimeout(context.TODO(), pveTaskPollingTimeout)
+	defer cancel()
+
 	for {
 		err := d.runCommandOnCurrentMachine("sudo cloud-init status --wait")
 		if err == nil {
@@ -50,7 +53,12 @@ func (d *Driver) waitForCloudinit() error {
 
 		log.Warn("failed to execute 'sudo cloud-init status --wait' over SSH, will retry:", err.Error())
 
-		<-time.After(pveTaskPollingInterval)
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("timed out waiting for cloud-init to finish: %w", context.DeadlineExceeded)
+		case <-time.After(pveTaskPollingInterval):
+			continue
+		}
 	}
 }
 
