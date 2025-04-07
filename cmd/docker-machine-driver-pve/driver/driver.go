@@ -114,6 +114,19 @@ func (d *Driver) Create() error {
 
 	d.PVEMachineID = &vmid
 
+	if err := d.initialize(); err != nil {
+		if removeErr := d.Remove(); removeErr != nil {
+			return fmt.Errorf("failed to initialize the machine: %w; failed to remove uninitialized machine: %w", err, removeErr)
+		}
+
+		return fmt.Errorf("failed to initialize the machine: %w; machine was removed successfully", err)
+	}
+
+	return nil
+}
+
+// Initializes the current machine.
+func (d *Driver) initialize() error {
 	log.Info("Tagging the machine...")
 
 	machine, err := d.getPVEVirtualMachine(context.TODO(), *d.PVEMachineID)
