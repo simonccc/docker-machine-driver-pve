@@ -2,6 +2,12 @@
 
 This is a Docker/[Rancher Machine](https://github.com/rancher/machine) driver for [Proxmox VE](https://www.proxmox.com/en/proxmox-virtual-environment/overview).
 
+## Demonstration
+
+> Click to view the video 👇
+
+[![YouTube video demonstrating the driver in Rancher](https://img.youtube.com/vi/aQBtw6XlxAE/maxresdefault.jpg)](https://www.youtube.com/watch?v=aQBtw6XlxAE)
+
 ## Installation
 
 ### Rancher
