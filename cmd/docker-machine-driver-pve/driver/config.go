@@ -21,6 +21,10 @@ const (
 	flagNetworkInterface = "pve-network-interface"
 	flagSSHUser          = "pve-ssh-user"
 	flagSSHPort          = "pve-ssh-port"
+	flagProcessorSockets = "pve-processor-sockets"
+	flagProcessorCores   = "pve-processor-cores"
+	flagMemory           = "pve-memory"
+	flagMemoryBalloon    = "pve-memory-balloon"
 )
 
 // Default values for flags.
@@ -54,6 +58,18 @@ type config struct {
 
 	// Bus/Device of the network interface to read machine's IP address from (e.g. 'net0').
 	NetworkInterfaceName string
+
+	// Number of processor sockets. If set to 0 (default), this configuration is skipped.
+	ProcessorSockets int
+
+	// Number of processor cores. If set to 0 (default), this configuration is skipped.
+	ProcessorCores int
+
+	// Amount of memory in MiB. If set to 0 (default), this configuration is skipped.
+	Memory int
+
+	// Minimum amount of memory in MiB. If set to 0 (default), defaults to "pve-memory" or skips if it's also 0.
+	MemoryBalloon int
 }
 
 // GetCreateFlags implements drivers.Driver.
@@ -109,10 +125,32 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			EnvVar: flagEnvVarFromFlagName(flagSSHPort),
 			Usage:  fmt.Sprintf("Port to use when connecting to the machine via SSH, defaults to '%d'", defaultSSHPort),
 		},
+		mcnflag.IntFlag{
+			Name:   flagProcessorSockets,
+			EnvVar: flagEnvVarFromFlagName(flagProcessorSockets),
+			Usage:  "Number of processor sockets. If set to 0 (default), this configuration is skipped.",
+		},
+		mcnflag.IntFlag{
+			Name:   flagProcessorCores,
+			EnvVar: flagEnvVarFromFlagName(flagProcessorCores),
+			Usage:  "Number of processor cores. If set to 0 (default), this configuration is skipped.",
+		},
+		mcnflag.IntFlag{
+			Name:   flagMemory,
+			EnvVar: flagEnvVarFromFlagName(flagMemory),
+			Usage:  "Amount of memory in MiB. If set to 0 (default), this configuration is skipped.",
+		},
+		mcnflag.IntFlag{
+			Name:   flagMemoryBalloon,
+			EnvVar: flagEnvVarFromFlagName(flagMemoryBalloon),
+			Usage:  fmt.Sprintf("Minimum amount of memory in MiB. If set to 0 (default), defaults to value of '--%s' or skips if it's also set to 0.", flagMemory),
+		},
 	}
 }
 
 // SetConfigFromFlags implements drivers.Driver.
+//
+//nolint:cyclop
 func (d *Driver) SetConfigFromFlags(opts drivers.DriverOptions) error {
 	d.URL = opts.String(flagURL)
 	if d.URL == "" {
@@ -165,6 +203,32 @@ func (d *Driver) SetConfigFromFlags(opts drivers.DriverOptions) error {
 		d.SSHPort = defaultSSHPort
 	} else if d.SSHPort < 0 {
 		return fmt.Errorf("flag '--%s' must be > 0", flagSSHPort)
+	}
+
+	d.ProcessorSockets = opts.Int(flagProcessorSockets)
+	if d.ProcessorSockets != 0 && d.ProcessorSockets < 1 {
+		return fmt.Errorf("flag '--%s' must be >= 1; set to 0 to disable", flagProcessorSockets)
+	}
+
+	d.ProcessorCores = opts.Int(flagProcessorCores)
+	if d.ProcessorCores != 0 && d.ProcessorCores < 1 {
+		return fmt.Errorf("flag '--%s' must be >= 1; set to 0 to disable", flagProcessorCores)
+	}
+
+	d.Memory = opts.Int(flagMemory)
+	if d.Memory != 0 && d.Memory < 1 {
+		return fmt.Errorf("flag '--%s' must be >= 1; set to 0 to disable", flagMemory)
+	}
+
+	d.MemoryBalloon = opts.Int(flagMemoryBalloon)
+	if d.MemoryBalloon == 0 {
+		d.MemoryBalloon = d.Memory
+	} else if d.MemoryBalloon < 1 {
+		return fmt.Errorf("flag '--%s' must be >= 1; set to 0 to disable", flagMemoryBalloon)
+	}
+
+	if d.MemoryBalloon > d.Memory {
+		return fmt.Errorf("flag '--%s' must be <= than flag '--%s'", flagMemoryBalloon, flagMemory)
 	}
 
 	return nil

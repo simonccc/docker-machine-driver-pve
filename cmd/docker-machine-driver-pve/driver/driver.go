@@ -144,6 +144,12 @@ func (d *Driver) initialize() error {
 		return fmt.Errorf("failed to add tag '%s' to Proxmox VE virtual machine ID='%d': %w", pveMachineTag, *d.PVEMachineID, err)
 	}
 
+	log.Info("Configuring machine hardware...")
+
+	if err := d.setupHardware(context.TODO()); err != nil {
+		return err
+	}
+
 	log.Info("Configuring cloud-init...")
 
 	if err := d.setupCloudinit(context.TODO()); err != nil {
