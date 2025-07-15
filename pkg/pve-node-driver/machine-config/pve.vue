@@ -2,11 +2,13 @@
 import { SECRET } from '@shell/config/types';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
+import UnitInput from '@shell/components/form/UnitInput';
 
 export default {
   components: {
     LabeledInput,
     LabeledSelect,
+    UnitInput,
   },
   props: {
     mode: {
@@ -47,6 +49,10 @@ export default {
         networkInterface: this.value.networkInterface ?? '',
         sshUser: this.value.sshUser ? this.value.sshUser : 'service',
         sshPort: this.value.sshPort ? parseInt(this.value.sshPort) : 22,
+        processorSockets: this.value.processorSockets ? parseInt(this.value.processorSockets) : "",
+        processorCores: this.value.processorCores ? parseInt(this.value.processorCores) : "",
+        memory: this.value.memory ? parseInt(this.value.memory) : "",
+        memoryBalloon: this.value.memoryBalloon ? parseInt(this.value.memoryBalloon) : "",
       },
     }
   },
@@ -134,6 +140,23 @@ export default {
   },
   methods: {
     validate(){
+      // Default optional number fields to empty string
+      if(this.currentValue.processorSockets === null || this.currentValue.processorSockets === 0) {
+        this.currentValue.processorSockets = "";
+      }
+
+      if(this.currentValue.processorCores === null || this.currentValue.processorCores === 0) {
+        this.currentValue.processorCores = "";
+      }
+
+      if(this.currentValue.memory === null || this.currentValue.memory === 0) {
+        this.currentValue.memory = "";
+      }
+
+      if(this.currentValue.memoryBalloon === null || this.currentValue.memoryBalloon === 0) {
+        this.currentValue.memoryBalloon = "";
+      }
+
       // Sanity check current value
       if(this.currentValue.resourcePool == '') {
         this.$emit('validationChanged', false);
@@ -165,6 +188,31 @@ export default {
         return
       }
 
+      if(this.currentValue.processorSockets != "" && this.currentValue.processorSockets < 1) {
+        this.$emit('validationChanged', false);
+        return
+      }
+
+      if(this.currentValue.processorCores != "" && this.currentValue.processorCores < 1) {
+        this.$emit('validationChanged', false);
+        return
+      }
+
+      if(this.currentValue.memory != "" && this.currentValue.memory < 1) {
+        this.$emit('validationChanged', false);
+        return
+      }
+
+      if(this.currentValue.memoryBalloon != "" && this.currentValue.memoryBalloon < 1) {
+        this.$emit('validationChanged', false);
+        return
+      }
+
+      if(this.currentValue.memory != "" && this.currentValue.memoryBalloon != "" && this.currentValue.memory < this.currentValue.memoryBalloon) {
+        this.$emit('validationChanged', false);
+        return
+      }
+
       // Copy current value to the 'value' prop
       this.value.resourcePool = this.currentValue.resourcePool;
       this.value.template = this.currentValue.template.toString();
@@ -172,6 +220,10 @@ export default {
       this.value.networkInterface = this.currentValue.networkInterface;
       this.value.sshUser = this.currentValue.sshUser;
       this.value.sshPort = this.currentValue.sshPort.toString();
+      this.value.processorSockets = this.currentValue.processorSockets.toString();
+      this.value.processorCores = this.currentValue.processorCores.toString();
+      this.value.memory = this.currentValue.memory.toString();
+      this.value.memoryBalloon = this.currentValue.memoryBalloon.toString();
 
       this.$emit('validationChanged', true);
     },
@@ -451,6 +503,66 @@ export default {
           label-key="cluster.machineConfig.pve.devices.network.label"
           tooltip-key="cluster.machineConfig.pve.devices.network.tooltip"
           required
+        />
+      </div>
+    </div>
+
+    <h2 class="mt-20">
+      <t k="cluster.machineConfig.pve.hardware.header" />
+    </h2>
+    <div class="row mt-20">
+      <div class="col span-6">
+        <!-- Processor sockets -->
+        <UnitInput
+          type="number"
+          :mode="mode"
+          v-model:value="currentValue.processorSockets"
+          label-key="cluster.machineConfig.pve.hardware.processorSockets.label"
+          suffix="sockets"
+          min="0"
+          step="1"
+        />
+      </div>
+      <div class="col span-6">
+        <!-- Processor cores -->
+        <UnitInput
+          type="number"
+          :mode="mode"
+          v-model:value="currentValue.processorCores"
+          label-key="cluster.machineConfig.pve.hardware.processorCores.label"
+          suffix="cores"
+          min="0"
+          step="1"
+        />
+      </div>
+    </div>
+
+    <div class="row mt-20">
+      <div class="col span-6">
+        <!-- Memory -->
+        <UnitInput
+          type="number"
+          :mode="mode"
+          v-model:value="currentValue.memory"
+          label-key="cluster.machineConfig.pve.hardware.memory.label"
+          suffix="MiB"
+          :status="currentValue.memory != '' && currentValue.memoryBalloon != '' && currentValue.memoryBalloon > currentValue.memory ? 'error' : undefined"
+          min="0"
+          step="256"
+        />
+      </div>
+      <div class="col span-6">
+        <!-- Memory balloon -->
+        <UnitInput
+          type="number"
+          :mode="mode"
+          v-model:value="currentValue.memoryBalloon"
+          label-key="cluster.machineConfig.pve.hardware.memoryBalloon.label"
+          suffix="MiB"
+          :status="currentValue.memory != '' && currentValue.memoryBalloon != '' && currentValue.memoryBalloon > currentValue.memory ? 'error' : undefined"
+          min="0"
+          step="256"
+          :max="currentValue.memory != '' ? currentValue.memory : undefined"
         />
       </div>
     </div>
