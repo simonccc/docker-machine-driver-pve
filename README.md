@@ -12,8 +12,6 @@ This is a Docker/[Rancher Machine](https://github.com/rancher/machine) driver fo
 
 ### Rancher
 
-> **NOTE:** Until we release version `1.0.0` you will have to enable [Prerelease Versions](https://documentation.suse.com/cloudnative/rancher-manager/latest/en/cluster-admin/helm-charts-in-rancher/helm-charts-in-rancher.html#_prerelease_versions) in Rancher.
-
 1. In `local` cluster explorer (i.e. the cluster where Rancher is deployed) go to `Apps > Repositories > Create` and create repository with following settings:
 
     * Name: `pve-node-driver`
