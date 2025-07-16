@@ -16,3 +16,8 @@ rules:
       - build
       # Other changes: bumping dependencies, configuring tools etc.
       - chore
+  scope-enum:
+    - 2
+    - always
+    - - docker-machine-driver
+      - rancher-ui-extension
