@@ -624,6 +624,7 @@ export default {
             :disabled="disabled || (templates != null && !currentValue.template)"
             v-model:value="currentValue.memoryBalloon"
             label-key="cluster.machineConfig.pve.memoryBalloon.minimumMemory.label"
+            tooltip-key="cluster.machineConfig.pve.memoryBalloon.minimumMemory.tooltip"
             suffix="MiB"
             min="0"
             step="256"
