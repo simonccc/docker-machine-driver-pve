@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/luthermonson/go-proxmox"
 	"github.com/rancher/machine/libmachine/drivers"
@@ -103,16 +105,34 @@ func (d *Driver) Create() error {
 
 	log.Info("Creating the machine...")
 
-	vmid, err := d.createPVEVirtualMachine(context.TODO())
-	if err != nil {
-		if vmid > 0 {
-			log.Warn("Machine might have been created with ID='%d'", vmid)
+	retryBackoff := 1 // seconds
+
+	for {
+		vmid, err := d.createPVEVirtualMachine(context.TODO())
+		if err != nil {
+			if strings.Contains(err.Error(), "config file already exists") {
+				log.Warn("Hit ID conflict when cloning the machine, will retry...")
+
+				//nolint:gosec // Weak number generator is good enough for this case
+				<-time.After(time.Duration(retryBackoff+rand.Intn(retryBackoff)) * time.Second)
+
+				// Double the backoff for next iteration
+				retryBackoff *= 2
+
+				continue
+			}
+
+			if vmid > 0 {
+				log.Warnf("Machine might have been created with ID='%d'", vmid)
+			}
+
+			return fmt.Errorf("failed to create machine: %w", err)
 		}
 
-		return fmt.Errorf("failed to create machine: %w", err)
-	}
+		d.PVEMachineID = &vmid
 
-	d.PVEMachineID = &vmid
+		break
+	}
 
 	if err := d.initialize(); err != nil {
 		if removeErr := d.Remove(); removeErr != nil {
