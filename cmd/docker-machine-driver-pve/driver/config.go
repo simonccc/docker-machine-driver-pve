@@ -26,6 +26,7 @@ const (
 	flagProcessorCores   = "pve-processor-cores"
 	flagMemory           = "pve-memory"
 	flagMemoryBalloon    = "pve-memory-balloon"
+	flagFullClone        = "pve-full-clone"
 )
 
 // Default values for flags.
@@ -72,6 +73,9 @@ type config struct {
 	// If set, minimum amount of memory in MiB to configure for the machine.
 	// If set to 0, disables memory ballooning.
 	MemoryBalloon *int
+
+	// Forces full copy of all disks, even if underlying storage supports linked clones.
+	FullClone bool
 }
 
 // GetCreateFlags implements drivers.Driver.
@@ -146,6 +150,11 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:   flagMemoryBalloon,
 			EnvVar: flagEnvVarFromFlagName(flagMemoryBalloon),
 			Usage:  "If set, minimum amount of memory in MiB to configure for the machine. If set to 0, disables memory ballooning.",
+		},
+		mcnflag.BoolFlag{
+			Name:   flagFullClone,
+			EnvVar: flagEnvVarFromFlagName(flagFullClone),
+			Usage:  "Forces full copy of all disks, even if underlying storage supports linked clones.",
 		},
 	}
 }
@@ -246,6 +255,8 @@ func (d *Driver) SetConfigFromFlags(opts drivers.DriverOptions) error {
 	if d.Memory != nil && d.MemoryBalloon != nil && *d.MemoryBalloon > *d.Memory {
 		return fmt.Errorf("flag '--%s' must be <= than flag '--%s'", flagMemoryBalloon, flagMemory)
 	}
+
+	d.FullClone = opts.Bool(flagFullClone)
 
 	return nil
 }

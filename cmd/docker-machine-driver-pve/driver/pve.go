@@ -30,7 +30,7 @@ func (d *Driver) createPVEVirtualMachine(ctx context.Context) (int, error) {
 	vmid, task, err := template.Clone(ctx, &proxmox.VirtualMachineCloneOptions{
 		Name: d.MachineName,
 		Pool: d.ResourcePoolName,
-		Full: 0,
+		Full: map[bool]uint8{false: 0, true: 1}[d.FullClone],
 	})
 	if err != nil {
 		return vmid, fmt.Errorf("failed to clone template ID='%d': %w", d.TemplateID, err)
