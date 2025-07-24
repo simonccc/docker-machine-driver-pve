@@ -3,12 +3,14 @@ import { SECRET } from '@shell/config/types';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import UnitInput from '@shell/components/form/UnitInput';
+import Checkbox from '@components/Form/Checkbox/Checkbox';
 
 export default {
   components: {
     LabeledInput,
     LabeledSelect,
     UnitInput,
+    Checkbox,
   },
   props: {
     uuid: {
@@ -57,6 +59,7 @@ export default {
         processorCores: this.value.processorCores ? parseInt(this.value.processorCores) : "",
         memory: this.value.memory ? parseInt(this.value.memory) : "",
         memoryBalloon: this.value.memoryBalloon ? parseInt(this.value.memoryBalloon) : "",
+        fullClone: this.value.fullClone ?? false,
       },
     }
   },
@@ -240,6 +243,7 @@ export default {
       this.value.processorCores = this.currentValue.processorCores.toString();
       this.value.memory = this.currentValue.memory.toString();
       this.value.memoryBalloon = this.currentValue.memoryBalloon.toString();
+      this.value.fullClone = this.currentValue.fullClone;
 
       this.$emit('validationChanged', true);
     },
@@ -636,7 +640,7 @@ export default {
       <h3>
         <t k="cluster.machineConfig.pve.ssh.header" />
       </h3>
-      <div class="row">
+      <div class="row mb-20">
         <div class="col span-6">
           <!-- SSH Username -->
           <LabeledInput
@@ -659,6 +663,21 @@ export default {
             required
             min="1"
             step="1"
+          />
+        </div>
+      </div>
+
+      <h3>
+        <t k="cluster.machineConfig.pve.template.header" />
+      </h3>
+      <div class="row">
+        <div class="col span-6">
+          <!-- Force full clone -->
+          <Checkbox
+            :mode="mode"
+            v-model:value="currentValue.fullClone"
+            label-key="cluster.machineConfig.pve.template.cloning.label"
+            tooltip-key="cluster.machineConfig.pve.template.cloning.tooltip"
           />
         </div>
       </div>
