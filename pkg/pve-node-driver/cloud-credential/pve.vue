@@ -86,7 +86,6 @@ export default {
   
           if(!data.version.startsWith('8.')) {
             this.errorLabelKey = 'cluster.credential.pve.errors.unsupportedProxmoxVersion';
-            return false;
           }
         } catch(e) {
           if(e._status == 401) {
