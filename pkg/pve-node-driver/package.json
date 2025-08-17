@@ -1,7 +1,7 @@
 {
   "name": "pve-node-driver",
   "description": "Node Driver for Proxmox Virtual Environment.",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": false,
   "rancher": {
     "annotations": {
