@@ -1,6 +1,6 @@
 {
   "editor.indentSize": "tabSize",
-  "editor.tabSize": 2,
+  "editor.tabSize": 1,
   "files.insertFinalNewline": true,
   "go.lintTool": "golangci-lint",
   "go.lintFlags": [
