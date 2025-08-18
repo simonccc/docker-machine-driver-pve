@@ -71,7 +71,7 @@ jobs:
           && yq -i ".uiPlugin.endpoint = \"${{ steps.pages.outputs.base_url }}/extensions/pve-node-driver/${GITHUB_REF_NAME#v}\"" deploy/charts/pve-node-driver/values.yaml
           && cat deploy/charts/pve-node-driver/values.yaml
           && helm package ./deploy/charts/pve-node-driver \
-              --version "${GITHUB_REF_NAME#v}" \
+              --version "12.3.4" \
               --app-version "${GITHUB_REF_NAME}" \
               --destination ./release_artifacts
       - name: Generate licenses.txt
@@ -97,9 +97,9 @@ jobs:
           && helm repo index ./release_artifacts --merge ./index.yaml --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}"
           && cp ./release_artifacts/index.yaml ./index.yaml
           && git add ./index.yaml
-          && mkdir -p "./extensions/pve-node-driver/${GITHUB_REF_NAME#v}/plugin"
-          && cp ./dist-pkg/pve-node-driver-${GITHUB_REF_NAME#v}/* "extensions/pve-node-driver/${GITHUB_REF_NAME#v}/plugin"
-          && (cd "extensions/pve-node-driver/${GITHUB_REF_NAME#v}" && find * -type f | sort) > "extensions/pve-node-driver/${GITHUB_REF_NAME#v}/files.txt"
-          && git add "extensions/pve-node-driver/${GITHUB_REF_NAME#v}"
+          && mkdir -p "./extensions/pve-node-driver/${GITHUB_REF_NAME}/plugin"
+          && cp ./dist-pkg/pve-node-driver-${GITHUB_REF_NAME}/* "extensions/pve-node-driver/${GITHUB_REF_NAME#v}/plugin"
+          && (cd "extensions/pve-node-driver/${GITHUB_REF_NAME}" && find * -type f | sort) > "extensions/pve-node-driver/${GITHUB_REF_NAME#v}/files.txt"
+          && git add "extensions/pve-node-driver/${GITHUB_REF_NAME}"
           && git commit -m "chore: update Helm repo index for ${GITHUB_REF_NAME}"
           && git push origin gh-pages
